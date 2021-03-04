@@ -43,4 +43,4 @@ Tile.prototype.print = function () {
 		   "| H: " + this.mTexture.getXform().getHeight() + "\n" +
 		   "xPos: " + this.mTexture.getXform().getXPos() +
 		   "| yPos: " + this.mTexture.getXform().getYPos() + "\n";
-}
+};
