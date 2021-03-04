@@ -20,8 +20,24 @@ function MyGame() {
     this.mLineSet = [];
     this.mCurrentLine = null;
     this.mP1 = null;
+    
+    this.testDirt = null;
+    
+    this.dirtTexture = "assets/MC_Dirt.png";
+    this.dirtTile = null;
 }
 gEngine.Core.inheritPrototype(MyGame, Scene);
+
+MyGame.prototype.loadScene = function () {
+    // loads the textures
+    gEngine.Textures.loadTexture(this.dirtTexture);
+};
+
+MyGame.prototype.unloadScene = function () {
+    // Game loop not running, unload all assets
+
+    gEngine.Textures.unloadTexture(this.dirtTexture);
+};
 
 MyGame.prototype.initialize = function () {
     // Step A: set up the cameras
@@ -37,6 +53,14 @@ MyGame.prototype.initialize = function () {
     this.mMsg.setColor([0, 0, 0, 1]);
     this.mMsg.getXform().setPosition(-19, -8);
     this.mMsg.setTextHeight(3);
+    
+    this.testDirt = new TextureRenderable(this.dirtTexture);
+    this.testDirt.setColor([0, 0, 0, 0]);
+    this.testDirt.getXform().setPosition(5, 5);
+    this.testDirt.getXform().setSize(5, 5);
+    
+    this.dirtTile = new Tile(this.testDirt);
+    this.dirtTile.setRarity(50);
 };
 
 // This is the draw function, make sure to setup proper drawing environment, and more
@@ -52,6 +76,8 @@ MyGame.prototype.draw = function () {
         l.draw(this.mCamera);
     }
     this.mMsg.draw(this.mCamera);   // only draw status in the main camera
+    
+    this.testDirt.draw(this.mCamera);
 };
 
 // The Update function, updates the application state. Make sure to _NOT_ draw
@@ -60,35 +86,6 @@ MyGame.prototype.update = function () {
     var msg = "Lines: " + this.mLineSet.length + " ";
     var echo = "";
     var x, y;
-
-    if (gEngine.Input.isButtonPressed(gEngine.Input.mouseButton.Middle)) {
-        var len = this.mLineSet.length;
-        if (len > 0) {
-            this.mCurrentLine = this.mLineSet[len - 1];
-            x = this.mCamera.mouseWCX();
-            y = this.mCamera.mouseWCY();
-            echo += "Selected " + len + " ";
-            echo += "[" + x.toPrecision(2) + " " + y.toPrecision(2) + "]";
-            this.mCurrentLine.setFirstVertex(x, y);
-        }
-    }
-
-    if (gEngine.Input.isButtonPressed(gEngine.Input.mouseButton.Left)) {
-        x = this.mCamera.mouseWCX();
-        y = this.mCamera.mouseWCY();
-        echo += "[" + x.toPrecision(2) + " " + y.toPrecision(2) + "]";
-
-        if (this.mCurrentLine === null) { // start a new one
-            this.mCurrentLine = new LineRenderable();
-            this.mCurrentLine.setFirstVertex(x, y);
-            this.mLineSet.push(this.mCurrentLine);
-        } else {
-            this.mCurrentLine.setSecondVertex(x, y);
-        }
-    } else {
-        this.mCurrentLine = null;
-        this.mP1 = null;
-    }
 
     msg += echo;
     this.mMsg.setText(msg);
