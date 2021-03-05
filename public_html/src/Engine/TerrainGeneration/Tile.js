@@ -5,15 +5,20 @@
 
 "use strict";  // Operate in Strict mode such that variables must be declared before used!
 
-function Tile(texture) {
-	this.mTexture = texture;
-	this.mRarity = 0; // Value should be between 0 and 100
+function Tile(textureAsset, posArr, sizeArr) {
+	this.mTexture = new TextureRenderable(textureAsset);
+	this.mTexture.setColor([1, 1, 1, 1]);
+	this.mTexture.getXform.setPosition(posArr[0], posArr[1]);
+	this.mTexture.getXform.setSize(sizeArr[0], sizeArr[1]);
+	
 	
 	var width = texture.getXform().getWidth();
 	var height = texture.getXform().getHeight();
 	var xPos = texture.getXform().getXPos();
 	var yPos = texture.getXform().getYPos();
 	this.mBound = new BoundingBox([xPos, yPos], width, height);
+
+	this.mRarity = 0; // Value should be between 0 and 100
 }
 
 Tile.prototype.setTexture = function (texture) {
@@ -34,6 +39,10 @@ Tile.prototype.setRarity = function (value) {
 
 Tile.prototype.checkOtherTile = function (other) {
 	return this.mBound.intersectsBound(other.mBound);
+};
+
+Tile.prototype.draw = function (camera) {
+	this.mTexture.draw(camera);
 };
 
 // Debugging helper function

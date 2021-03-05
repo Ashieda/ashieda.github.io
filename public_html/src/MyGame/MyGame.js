@@ -54,12 +54,12 @@ MyGame.prototype.initialize = function () {
     this.mMsg.getXform().setPosition(-19, -8);
     this.mMsg.setTextHeight(3);
     
-    this.testDirt = new TextureRenderable(this.dirtTexture);
-    this.testDirt.setColor([0, 0, 0, 0]);
-    this.testDirt.getXform().setPosition(5, 5);
-    this.testDirt.getXform().setSize(5, 5);
+    // this.testDirt = new TextureRenderable(this.dirtTexture);
+    // this.testDirt.setColor([0, 0, 0, 0]);
+    // this.testDirt.getXform().setPosition(5, 5);
+    // this.testDirt.getXform().setSize(5, 5);
     
-    this.dirtTile = new Tile(this.testDirt);
+    this.dirtTile = new Tile(this.dirtTexture, [5, 5], [5, 5]);
     this.dirtTile.setRarity(50);
 };
 
@@ -77,7 +77,7 @@ MyGame.prototype.draw = function () {
     }
     this.mMsg.draw(this.mCamera);   // only draw status in the main camera
     
-    this.testDirt.draw(this.mCamera);
+    this.dirtTile.draw(this.mCamera);
 };
 
 // The Update function, updates the application state. Make sure to _NOT_ draw
