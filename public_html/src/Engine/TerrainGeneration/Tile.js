@@ -10,14 +10,8 @@ function Tile(textureAsset, posArr, sizeArr) {
 	this.mTexture.setColor([1, 1, 1, 1]);
 	this.mTexture.getXform.setPosition(posArr[0], posArr[1]);
 	this.mTexture.getXform.setSize(sizeArr[0], sizeArr[1]);
-	
-	
-	var width = texture.getXform().getWidth();
-	var height = texture.getXform().getHeight();
-	var xPos = texture.getXform().getXPos();
-	var yPos = texture.getXform().getYPos();
-	this.mBound = new BoundingBox([xPos, yPos], width, height);
 
+	this.mBound = new BoundingBox(posArr, sizeArr[0], sizeArr[1]);
 	this.mRarity = 0; // Value should be between 0 and 100
 }
 
