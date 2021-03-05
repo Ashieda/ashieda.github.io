@@ -15,5 +15,9 @@
         <group name="BookChapters"/>
         <group name="AllBookProjects"/>
         <group name="Apress-2d-game-engine"/>
+        <group>
+            <file>file:/Users/ryokususanta/CodeProjects/ProceduralTerrainGeneration/public_html/src/MyGame/Tile.js</file>
+            <file>file:/Users/ryokususanta/CodeProjects/ProceduralTerrainGeneration/public_html/src/MyGame/MyGame.js</file>
+        </group>
     </open-files>
 </project-private>
