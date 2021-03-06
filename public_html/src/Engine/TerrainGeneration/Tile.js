@@ -1,5 +1,5 @@
 /*
-* File: Tile.js 
+* File: Tile.js
 * This is a Tile Class/Object used for procedural terrain generation
 */
 
@@ -7,9 +7,9 @@
 
 function Tile(textureAsset, posArr, sizeArr) {
 	this.mTexture = new TextureRenderable(textureAsset);
-	this.mTexture.setColor([1, 1, 1, 1]);
-	this.mTexture.getXform.setPosition(posArr[0], posArr[1]);
-	this.mTexture.getXform.setSize(sizeArr[0], sizeArr[1]);
+	this.mTexture.setColor([0, 0, 0, 0]);
+	this.mTexture.getXform().setPosition(posArr[0], posArr[1]);
+	this.mTexture.getXform().setSize(sizeArr[0], sizeArr[1]);
 
 	this.mBound = new BoundingBox(posArr, sizeArr[0], sizeArr[1]);
 	this.mRarity = 0; // Value should be between 0 and 100
@@ -33,10 +33,6 @@ Tile.prototype.setRarity = function (value) {
 
 Tile.prototype.checkOtherTile = function (other) {
 	return this.mBound.intersectsBound(other.mBound);
-};
-
-Tile.prototype.draw = function (camera) {
-	this.mTexture.draw(camera);
 };
 
 // Debugging helper function
