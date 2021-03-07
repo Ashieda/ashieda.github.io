@@ -29,6 +29,7 @@ function MyGame() {
 
     this.mWorldMatrix = null;
     this.mTiers = null;
+    this.mCameraCenter = null;
 
 }
 gEngine.Core.inheritPrototype(MyGame, Scene);
@@ -60,13 +61,15 @@ MyGame.prototype.initialize = function () {
     this.mCamera.setBackgroundColor([0.8, 0.8, 0.8, 1]);
             // sets the background to gray
 
+    this.mCameraCenter = [30, 27.5];
+
     this.arr = [];
     this.nextPos = [-17.5, -7.5];
-    this.tileSize = [2, 2];
+    this.tileSize = [3, 3];
 
     this.mWorldMatrix = null;
     this.mTiers = [ [0, 1],
-                    [1, 3],
+                    [99, 100],
                     [3, 4],
                     [3, 5],
                     [7, 10] ];
@@ -108,11 +111,76 @@ MyGame.prototype.update = function () {
                                          -10 + (this.tileSize[1]/2)],
                                         this.tileSize);                // tile size
 
-    this.mWorldMatrix.generateWorld(100/this.tileSize[0]);
+    this.mWorldMatrix.generateWorld(100/this.tileSize[0], 75/this.tileSize[1]);
   }
 
-  if (gEngine.Input.isKeyClicked(gEngine.Input.keys.S))
+  if (gEngine.Input.isKeyClicked(gEngine.Input.keys.T))
   {
     this.mWorldMatrix.smoothTerrain();
+  }
+
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.W))
+  {
+    if (this.mCameraCenter[1] < 60)
+    {
+      this.mCameraCenter[1] += (60 - this.mCameraCenter[1])*0.3;
+    }
+  }else {
+    if (this.mCameraCenter[1] > 27.5)
+    {
+      this.mCameraCenter[1] -= (this.mCameraCenter[1] - 27.5)*0.3;
+    }
+  }
+
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.A))
+  {
+    if (this.mCameraCenter[0] > 22.5)
+    {
+      this.mCameraCenter[0] -= (this.mCameraCenter[1] - 22.5)*0.3;
+    }
+  }else {
+    if (this.mCameraCenter[0] < 30)
+    {
+      this.mCameraCenter[0] += (30 - this.mCameraCenter[0])*0.3;
+    }
+  }
+
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.D))
+  {
+    if (this.mCameraCenter[0] < 37.5)
+    {
+      this.mCameraCenter[0] += (37.5 - this.mCameraCenter[1])*0.3;
+    }
+  }else {
+    if (this.mCameraCenter[0] > 30)
+    {
+      this.mCameraCenter[0] -= (this.mCameraCenter[0] - 30)*0.3;
+    }
+  }
+
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.S))
+  {
+    if (this.mCameraCenter[1] > 20)
+    {
+      this.mCameraCenter[1] -= (this.mCameraCenter[1] - 20)*0.3;
+    }
+  }else {
+    if (this.mCameraCenter[1] < 27.5)
+    {
+      this.mCameraCenter[1] += (27.5 - this.mCameraCenter[1])*0.3;
+    }
+  }
+
+  this.mCamera.setWCCenter(this.mCameraCenter[0], this.mCameraCenter[1]);
+
+  if (gEngine.Input.isButtonPressed(gEngine.Input.mouseButton.Left)) {
+    var x = Math.floor(this.mCamera.mouseWCX());
+    var y = Math.floor(this.mCamera.mouseWCY());
+    if(this.mWorldMatrix !== null){
+        var clickedTile = this.mWorldMatrix.getTile(x,y);
+        if(clickedTile !== null)
+            console.log(clickedTile.print());
+    }
+
   }
 };
