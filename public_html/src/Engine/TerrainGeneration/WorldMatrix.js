@@ -33,9 +33,11 @@ function WorldMatrix(layers, layersTiers, tiers, tilePosition, tileSize) {
   this.mLayersTiers = layersTiers;
   this.mTiers = tiers;
 
+  // Starting tile position [xWC, yWC]
   this.mTilePosition = tilePosition;
+  this.mLowerLeftPosX = tilePosition[0] - tileSize[0]/2;
+  this.mLowerLeftPosY = tilePosition[1] - tileSize[1]/2;
   this.mTileSize = tileSize;
-
 }
 
 WorldMatrix.prototype.getMatrix = function() { return this.mMatrix; };
@@ -91,16 +93,20 @@ WorldMatrix.prototype.randomizeLayers = function ()
 // the world. The user will later be able to modify the world
 //
 // User will pass in how many columns we will render
-WorldMatrix.prototype.generateWorld = function (numOfColumns)
+WorldMatrix.prototype.generateWorld = function (numOfColumns, height)
 {
   var startingX = this.mTilePosition[0];
   var startingY = this.mTilePosition[1];
+  var startingHeight = Math.floor(height);
+  height = startingHeight;
+
   // in each column we will initialize the elements bottom up
   for (var x = 0; x < numOfColumns; x++)
   {
     var col = [];
     // for each layer we will add a random amount of
     // elements, as dictated by the tier list, into col
+    height = startingHeight;
     for (var y = 0; y < this.mLayers.length; y++)
     {
       var lowerBound = this.mTiers[this.mLayersTiers[y]][0];
@@ -108,17 +114,18 @@ WorldMatrix.prototype.generateWorld = function (numOfColumns)
       // what if upper bound and lower bound are the same???
       var num = Math.floor(Math.random()*(upperBound + 1 - lowerBound)) + lowerBound;
       // adding num number of tile objects into the column
-      for (var z = 0; z < num; z++)
+      var z = 0;
+      for (z = 0; z < num; z++)
       {
         // if we reached the limit of items to render vertically
-        if (z > numOfColumns)
+        if (height <= 0)
         {
-          this.mTilePosition = [this.mTilePosition[0] + this.mTileSize[0], startingY];
           break;
         }
         var tile = new Tile(this.mLayers[y], this.mTilePosition, this.mTileSize);
         this.mTilePosition[1] += this.mTileSize[1];
         col.push(tile);
+        height--;
       }
     }
 
@@ -148,7 +155,7 @@ WorldMatrix.prototype.smoothTerrain = function ()
       if (check === 1)
       {
         this.mMatrix[r + 1].push(tile);
-      }else
+      } else
       {
         this.mMatrix[r].splice(this.mMatrix[r].length - 1, 1);
       }
@@ -167,4 +174,55 @@ WorldMatrix.prototype.smoothTerrain = function ()
       }
     }
   }
+};
+
+// == NOT TESTED ==
+//Updates the neighbor tiles of a tile at a given column & row index
+WorldMatrix.prototype.updateNeighbors = function(tileColIndex, tileRowIndex){
+    //Error check indeces
+    if(tileColIndex < 0 || tileColIndex > this.mMatrix.length - 1)
+        return;
+    else if(tileRowIndex < 0 || tileRowIndex > this.mMatrix[tileColIndex].length - 1)
+        return;
+
+    var targetTile = this.mMatrix[tileColIndex][tileRowIndex];
+
+    //Update the upper neighbor
+    //Requires the existence of higher tiles in this column
+    if(tileRowIndex + 1 < this.mMatrix[tileColIndex].length &&
+    tileColIndex)
+        targetTile.setTopNeighbor(this.mMatrix[tileColIndex][tileRowIndex + 1]);
+
+    //Update the bottom neighbor
+    //Requires bottom neighbor to be at the lowest row or higher
+    if(tileRowIndex - 1 > -1)
+        targetTile.setBotNeighbor(this.mMatrix[tileColIndex][tileRowIndex - 1]);
+
+    //Update the left neighbor
+    //Requires potential left neighbor to be in a valid column and at valid height
+    if(tileColIndex - 1 > -1 &&
+    this.mMatrix[tileColIndex - 1].length >= this.mMatrix[tileColIndex].length)
+        targetTile.setLeftNeighbor(this.mMatrix[tileColIndex - 1][tileRowIndex]);
+
+    //Update the right neighbor
+    //Requires the potential right neighbor to be in a valid column and at a valid height
+    if(tileColIndex + 1 < this.mMatrix.length &&
+    this.mMatrix[tileColIndex + 1].length >= this.mMatrix[tileColIndex].length)
+        targetTile.setRightNeighbor(this.mMatrix[tileColIndex + 1][tileRowIndex]);
+};
+
+// == NOT TESTED ==
+// Gets/returns a tile based on world coordinates
+WorldMatrix.prototype.getTile = function(xPos, yPos) {
+    //Need to universalize the startingX, startingY, and size values
+    //Then I need to figure out a way to determine which tile xPos and yPos refer to,
+    //if any
+    var tempX = Math.floor((xPos - this.mLowerLeftPosX)/this.mTileSize[0]);
+    var tempY = Math.floor((yPos - this.mLowerLeftPosY)/this.mTileSize[1]);
+    if (tempX < this.mMatrix.length && tempY < this.mMatrix[tempX].length)
+    {
+        return this.mMatrix[tempX][tempY];
+    }
+
+    return null;
 };
