@@ -110,7 +110,7 @@ MyGame.prototype.update = function () {
                                         [-20 + (this.tileSize[0]/2),   // starting position
                                          -10 + (this.tileSize[1]/2)],
                                         this.tileSize);                // tile size
-
+    // this.mWorldMatrix.randomizeLayers();                    
     this.mWorldMatrix.generateWorld(100/this.tileSize[0], 75/this.tileSize[1]);
   }
 
@@ -183,4 +183,6 @@ MyGame.prototype.update = function () {
     }
 
   }
+
+  this.mCamera.updateCam();
 };
