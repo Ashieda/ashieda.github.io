@@ -211,12 +211,8 @@ WorldMatrix.prototype.updateNeighbors = function(tileColIndex, tileRowIndex){
         targetTile.setRightNeighbor(this.mMatrix[tileColIndex + 1][tileRowIndex]);
 };
 
-// == NOT TESTED ==
 // Gets/returns a tile based on world coordinates
 WorldMatrix.prototype.getTile = function(xPos, yPos) {
-    //Need to universalize the startingX, startingY, and size values
-    //Then I need to figure out a way to determine which tile xPos and yPos refer to,
-    //if any
     var tempX = Math.floor((xPos - this.mLowerLeftPosX)/this.mTileSize[0]);
     var tempY = Math.floor((yPos - this.mLowerLeftPosY)/this.mTileSize[1]);
     if (tempX < this.mMatrix.length && tempY < this.mMatrix[tempX].length)
