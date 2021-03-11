@@ -184,5 +184,5 @@ MyGame.prototype.update = function () {
 
   }
 
-  this.mCamera.updateCam();
+  //this.mCamera.updateCam();
 };

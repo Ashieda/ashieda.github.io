@@ -184,8 +184,8 @@ SecondScene.prototype.update = function () {
     if(this.mWorldMatrix !== null){
         var clickedTile = this.mWorldMatrix.getTile(x,y);
         if(clickedTile !== null)
-            this.mWorldMatrix.emptySpace(clickedTile, .3);
-            //console.log(clickedTile.print());
+            //this.mWorldMatrix.emptySpace(clickedTile, .3);
+            console.log(clickedTile.print());
     }
 
   }
