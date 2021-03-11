@@ -126,15 +126,17 @@ MyGame.prototype.update = function () {
                        this.dirtTexture];
     var layerTiers = [3, 0, 4, 3];
 
-    this.mWorldMatrix = new WorldMatrix(arrOfLayers,                   // array of the layers
+    this.mWorldMatrix = new WorldMatrix(arrOfLayers,                    // array of the layers
                                         layerTiers,                    // array of the tiers for the layers
                                         this.mTiers,                   // array of standard tier values
                                         [-20 + (this.tileSize[0]/2),   // starting position
                                          -10 + (this.tileSize[1]/2)],
                                         this.tileSize);                // tile size
-    // this.mWorldMatrix.randomizeLayers();   
-    console.log("Test");
-    this.mWorldMatrix.generateWorld(100/this.tileSize[0], 75/this.tileSize[1], "test");
+
+    // this.mWorldMatrix.randomizeLayers();           
+    
+    this.mWorldMatrix.setSeed(12345);
+    this.mWorldMatrix.generateWorld(100/this.tileSize[0], 75/this.tileSize[1]);
   }
 
   if (gEngine.Input.isKeyClicked(gEngine.Input.keys.T))
