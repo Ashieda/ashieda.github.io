@@ -93,7 +93,7 @@ WorldMatrix.prototype.randomizeLayers = function ()
 // the world. The user will later be able to modify the world
 //
 // User will pass in how many columns we will render
-WorldMatrix.prototype.generateWorld = function (numOfColumns, height)
+WorldMatrix.prototype.generateWorld = function (numOfColumns, height, seed)
 {
   var startingX = this.mTilePosition[0];
   var startingY = this.mTilePosition[1];
@@ -112,6 +112,7 @@ WorldMatrix.prototype.generateWorld = function (numOfColumns, height)
       var lowerBound = this.mTiers[this.mLayersTiers[y]][0];
       var upperBound = this.mTiers[this.mLayersTiers[y]][1];
       // what if upper bound and lower bound are the same???
+
       var num = Math.floor(Math.random()*(upperBound + 1 - lowerBound)) + lowerBound;
       // adding num number of tile objects into the column
       var z = 0;

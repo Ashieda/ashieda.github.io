@@ -23,6 +23,7 @@ function SecondScene() {
     this.grassyDirtTexture = "assets/TR_GrassyDirt.png";
     this.ebonTexture = "assets/TR_Ebonstone.png";
     this.pinkBrickTexture = "assets/Terraria_PinkBrick.png";
+    this.dyeImage = "assets/Dye.png";
     this.dirtTile = null;
     this.arr = null;
     this.nextPos = null;
@@ -31,6 +32,17 @@ function SecondScene() {
     this.mWorldMatrix = null;
     this.mTiers = null;
     this.mCameraCenter = null;
+    
+    //Storage variables for tiles Dye collides with
+    this.topCollidingTile = null;
+    this.botCollidingTile = null;
+    this.leftCollidingTile = null;
+    this.rightCollidingTile = null;
+    
+    this.canMoveDown = true;
+    this.canMoveUp = true;
+    this.canMoveLeft = true;
+    this.canMoveRight = true;
 
 }
 gEngine.Core.inheritPrototype(SecondScene, Scene);
@@ -42,6 +54,7 @@ SecondScene.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.crimTexture);
     gEngine.Textures.loadTexture(this.ebonTexture);
     gEngine.Textures.loadTexture(this.pinkBrickTexture);
+    gEngine.Textures.loadTexture(this.dyeImage);
 };
 
 SecondScene.prototype.unloadScene = function () {
@@ -52,6 +65,7 @@ SecondScene.prototype.unloadScene = function () {
     gEngine.Textures.unloadTexture(this.crimTexture);
     gEngine.Textures.unloadTexture(this.ebonTexture);
     gEngine.Textures.unloadTexture(this.pinkBrickTexture);
+    gEngine.Textures.unloadTexture(this.dyeImage);
 };
 
 SecondScene.prototype.initialize = function () {
@@ -83,6 +97,12 @@ SecondScene.prototype.initialize = function () {
     this.mMsg.getXform().setPosition(-19, -8);
     this.mMsg.setTextHeight(3);
 
+    this.mHero = new SpriteRenderable(this.dyeImage);
+    this.mHero.setColor([1, 1, 1, 0]);
+    this.mHero.getXform().setPosition(30, 55);
+    this.mHero.getXform().setSize(3, 4);
+    this.mHero.createBoundingBox(30, 55, 3, 4);
+
     // this.dirtTile.setRarity(50);
 };
 
@@ -95,6 +115,8 @@ SecondScene.prototype.draw = function () {
     this.mCamera.setupViewProjection();
     if (this.mWorldMatrix !== null)
       this.mWorldMatrix.draw(this.mCamera);
+  
+    this.mHero.draw(this.mCamera);
 };
 
 // The Update function, updates the application state. Make sure to _NOT_ draw
@@ -174,6 +196,96 @@ SecondScene.prototype.update = function () {
     {
       this.mCameraCenter[1] += (27.5 - this.mCameraCenter[1])*0.3;
     }
+  }
+  
+    //******************Handle Dye's Movement************************//
+  var posDelta = 0.5;
+  
+  if(this.canMoveUp && gEngine.Input.isKeyPressed(gEngine.Input.keys.Up)){
+      this.mHero.getXform().incYPosBy(posDelta);
+  }
+  
+  if(this.canMoveDown && gEngine.Input.isKeyPressed(gEngine.Input.keys.Down)){
+      this.mHero.getXform().incYPosBy(-posDelta);
+  }
+  
+  if(this.canMoveLeft && gEngine.Input.isKeyPressed(gEngine.Input.keys.Left)){
+      this.mHero.getXform().incXPosBy(-posDelta);
+  }
+  
+  if(this.canMoveRight && gEngine.Input.isKeyPressed(gEngine.Input.keys.Right)){
+      this.mHero.getXform().incXPosBy(posDelta);
+  }
+  
+  //Update the bounding box position
+  var heroX = this.mHero.getXform().getXPos();
+  var heroY = this.mHero.getXform().getYPos();
+  var heroWidth = this.mHero.getXform().getWidth();
+  var heroHeight = this.mHero.getXform().getHeight();
+  this.mHero.setBound(heroX, heroY, heroWidth, heroHeight);
+  //****************************************************************//
+  
+  if(this.mWorldMatrix !== null){
+    var worldMatrix = this.mWorldMatrix.getMatrix();
+    //Check for collision between tiles and Dye
+    for(var i = 0; i < worldMatrix.length; ++i){
+        for(var j = 0; j < worldMatrix[i].length; ++j){
+            var tile = worldMatrix[i][j];
+            var tileBound = tile.getBound();
+            var heroBound = this.mHero.getBound();
+            var tileX = tile.getTexture().getXform().getXPos();
+            var tileY = tile.getTexture().getXform().getYPos();
+
+            //Restrict Dye's movement based on where she hit the tile
+            if(tile.objCollision(heroBound)){
+                if(heroBound.minY() < tileBound.maxY() && heroY > tileY){
+                    this.canMoveDown = false;
+                    this.botCollidingTile = tile;
+                }
+                if(heroBound.minX() < tileBound.maxX() && heroX > tileX){
+                    this.canMoveLeft = false;
+                    this.leftCollidingTile = tile;
+                }
+                if(heroBound.maxY() > tileBound.minY() && heroY < tileY){
+                    this.canMoveUp = false;
+                    this.topCollidingTile = tile;
+                }
+                if(heroBound.maxX() > tileBound.minX() && heroX < tileX){
+                    this.canMoveRight = false;
+                    this.rightCollidingTile = tile;
+                }
+            }
+
+        }
+    }
+    
+    this.mCamera.setWCCenter(heroX, heroY);
+    this.mCamera.updateCam();
+    
+    if(this.botCollidingTile !== null){
+        var heroBound = this.mHero.getBound();
+        if( ! this.botCollidingTile.objCollision(heroBound))
+            this.canMoveDown = true;
+    }
+    
+    if(this.leftCollidingTile !== null){
+        var heroBound = this.mHero.getBound();
+        if( ! this.leftCollidingTile.objCollision(heroBound))
+            this.canMoveLeft = true;
+    }
+    
+    if(this.topCollidingTile !== null){
+        var heroBound = this.mHero.getBound();
+        if( ! this.topCollidingTile.objCollision(heroBound))
+            this.canMoveUp = true;
+    }
+    
+    if(this.rightCollidingTile !== null){
+        var heroBound = this.mHero.getBound();
+        if( ! this.rightCollidingTile.objCollision(heroBound))
+            this.canMoveRight = true;
+    }
+    
   }
 
   this.mCamera.setWCCenter(this.mCameraCenter[0], this.mCameraCenter[1]);
