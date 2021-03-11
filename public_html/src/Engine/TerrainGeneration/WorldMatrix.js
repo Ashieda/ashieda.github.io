@@ -98,7 +98,7 @@ WorldMatrix.prototype.randomizeLayers = function ()
 // the world. The user will later be able to modify the world
 //
 // User will pass in how many columns we will render
-WorldMatrix.prototype.generateWorld = function (numOfColumns, height, seed)
+WorldMatrix.prototype.generateWorld = function (numOfColumns, height)
 {
   var startingX = this.mTilePosition[0];
   var startingY = this.mTilePosition[1];
@@ -140,6 +140,44 @@ WorldMatrix.prototype.generateWorld = function (numOfColumns, height, seed)
     this.mTilePosition = [this.mTilePosition[0] + this.mTileSize[0], startingY];
     this.mMatrix.push(col);
   }
+};
+
+WorldMatrix.prototype.addColumn = function(index, xPos, startY, height){
+    var col = [];
+    var yPos = startY;
+    // for each layer we will add a random amount of
+    // elements, as dictated by the tier list, into col
+    height = Math.floor(height);
+    for (var y = 0; y < this.mLayers.length; y++)
+    {
+      var lowerBound = this.mTiers[this.mLayersTiers[y]][0];
+      var upperBound = this.mTiers[this.mLayersTiers[y]][1];
+      // what if upper bound and lower bound are the same???
+
+      // var num = Math.floor(Math.random()*(upperBound + 1 - lowerBound)) + lowerBound;
+      var num = Math.floor(this.seedGenerator.random()*(upperBound + 1 - lowerBound)) + lowerBound;
+
+      // adding num number of tile objects into the column
+      var z = 0;
+      for (z = 0; z < num; z++)
+      {
+        // if we reached the limit of items to render vertically
+        if (height <= 0)
+        {
+          break;
+        }
+        var tile = new Tile(this.mLayers[y], [xPos, yPos], this.mTileSize);
+        yPos += this.mTileSize[1];
+        col.push(tile);
+        height--;
+      }
+    }
+
+    this.mMatrix.splice(index, 0, col);
+};
+
+WorldMatrix.prototype.removeColumn = function(columnNum){
+    this.mMatrix.splice(columnNum, 1);
 };
 
 // will either add a tile or delete a tile if 2 adjacent columns are

@@ -140,6 +140,49 @@ SecondScene.prototype.update = function () {
 
     this.mWorldMatrix.generateWorld(100/this.tileSize[0], 75/this.tileSize[1]);
   }
+  
+  //Get the x-position of the rightmost column
+  var rightMostX = 0;
+  if(this.mWorldMatrix !== null){
+      var worldMatrix = this.mWorldMatrix.getMatrix();
+      var bottomRightTile = worldMatrix[worldMatrix.length - 1][0];
+      var rightMostX = bottomRightTile.getTexture().getXform().getXPos();
+      var heroX = this.mHero.getXform().getXPos();
+      var floorY = bottomRightTile.getTexture().getXform().getYPos();
+      
+      //If the x-position of the rightmost column is less than 1.5 screenwidths
+      //from the player, add columns
+      var heroDistToRightEdge = rightMostX - heroX;
+      var screenWCWidth = this.mCamera.getWCWidth();
+      if(heroDistToRightEdge > (1.5 * screenWCWidth)){
+          this.mWorldMatrix.removeColumn(worldMatrix.length - 1);
+      }
+      if(heroDistToRightEdge < (1.5 * screenWCWidth)){
+          var newColX = rightMostX + this.tileSize[0];
+          var newColY = floorY;
+          this.mWorldMatrix.addColumn(worldMatrix.length, newColX, 
+                                        newColY, 75/this.tileSize[1]);
+      }
+      
+      var bottomLeftTile = worldMatrix[0][0];
+      var leftMostX = bottomLeftTile.getTexture().getXform().getXPos();
+      
+      //If the x-position of the leftmost column is greater than 1.5 screenwidths
+      //from the player, remove columns
+      var heroDistToLeftEdge = heroX - leftMostX;
+      if(heroDistToLeftEdge > (1.5 * screenWCWidth)){
+          this.mWorldMatrix.removeColumn(0);
+      } else if(heroDistToLeftEdge < (1.5 * screenWCWidth)){
+          var newColX = leftMostX - this.tileSize[0];
+          var newColY = floorY;
+          this.mWorldMatrix.addColumn(0, newColX, newColY, 75/this.tileSize[1]);
+      }
+      console.log("Number of columns: " + worldMatrix.length);
+      console.log("Leftmost X: " + leftMostX);
+      console.log("Rightmost X: " + rightMostX);
+  }
+
+  
 
   if (gEngine.Input.isKeyClicked(gEngine.Input.keys.T))
   {
