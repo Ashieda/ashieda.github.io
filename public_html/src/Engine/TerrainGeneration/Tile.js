@@ -48,10 +48,10 @@ Tile.prototype.setRightNeighbor = function(tile){
 
 Tile.prototype.getBound = function() {
 	return this.mBound;
-}
+};
 
-Tile.prototype.objCollision = function(object){
-    return this.mBound.intersectsBound(object.getBound());
+Tile.prototype.objCollision = function(objectBound){
+    return this.mBound.intersectsBound(objectBound);
 };
 
 // Debugging helper function

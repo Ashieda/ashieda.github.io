@@ -42,6 +42,18 @@ SpriteRenderable.eTexCoordArray = Object.freeze({
 // Public methods
 //**-----------------------------------------
 
+SpriteRenderable.prototype.createBoundingBox = function (x, y, width, height) {
+  this.mBound = new BoundingBox([x,y], width, height);
+};
+
+SpriteRenderable.prototype.setBound = function (x, y, width, height) {
+  this.mBound.setBounds([x,y], width, height);
+};
+
+SpriteRenderable.prototype.getBound = function () {
+    return this.mBound;
+};
+
 // specify element region by texture coordinate (between 0 to 1)
 SpriteRenderable.prototype.setElementUVCoordinate = function (left, right, bottom, top) {
     this.mTexLeft = left;

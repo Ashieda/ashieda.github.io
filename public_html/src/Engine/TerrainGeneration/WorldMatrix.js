@@ -176,6 +176,29 @@ WorldMatrix.prototype.smoothTerrain = function ()
   }
 };
 
+//Attempts to create empty pockets in terrain, starting from the parameter tile
+//Offers a horizontal and vertical clear chance to determine likelihood of neighbors
+//getting emptied as well
+WorldMatrix.prototype.emptySpace = function(tile, horizClearChance, vertClearChance){
+    if(tile.getTexture() === null)
+        return;
+    tile.setTexture(null);
+    
+    var topRandom = Math.random();
+    var botRandom = Math.random();
+    var leftRandom = Math.random();
+    var rightRandom = Math.random();
+    
+    if(tile.topNeighbor !== null && topRandom < vertClearChance)
+        this.emptySpace(tile.topNeighbor, vertClearChance);
+    if(tile.botNeighbor !== null && botRandom < vertClearChance)
+        this.emptySpace(tile.botNeighbor, vertClearChance);
+    if(tile.leftNeighbor !== null && leftRandom < horizClearChance)
+        this.emptySpace(tile.leftNeighbor, horizClearChance);
+    if(tile.rightNeighbor !== null && rightRandom < horizClearChance)
+        this.emptySpace(tile.rightNeighbor, horizClearChance);
+};
+
 // == NOT TESTED ==
 //Updates the neighbor tiles of a tile at a given column & row index
 WorldMatrix.prototype.updateNeighbors = function(tileColIndex, tileRowIndex){

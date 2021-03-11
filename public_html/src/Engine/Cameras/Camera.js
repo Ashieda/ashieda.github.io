@@ -181,4 +181,8 @@ Camera.prototype.clampAtBoundary = function (aXform, zone) {
     }
     return status;
 };
+
+Camera.prototype.updateCam = function(){
+    this.mCameraState.updateCameraState();
+};
 //</editor-fold>
