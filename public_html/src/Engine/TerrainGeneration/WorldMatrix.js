@@ -38,6 +38,8 @@ function WorldMatrix(layers, layersTiers, tiers, tilePosition, tileSize) {
   this.mLowerLeftPosX = tilePosition[0] - tileSize[0]/2;
   this.mLowerLeftPosY = tilePosition[1] - tileSize[1]/2;
   this.mTileSize = tileSize;
+
+  this.seedGenerator = new MersenneTwister();
 }
 
 WorldMatrix.prototype.getMatrix = function() { return this.mMatrix; };
@@ -51,6 +53,8 @@ WorldMatrix.prototype.setLayersTiers = function(layersTiers) { this.mLayersTiers
 
 WorldMatrix.prototype.getTiers = function() { return this.mTiers; };
 WorldMatrix.prototype.setTiers = function(tiers) { this.mTiers = tiers; };
+
+WorldMatrix.prototype.setSeed = function(seed) { this.seedGenerator = new MersenneTwister(seed); };
 
 
 // draw the world matrix, element by element, to the canvas
@@ -77,7 +81,8 @@ WorldMatrix.prototype.randomizeLayers = function ()
 
   while (this.mLayers.length !== 0)
   {
-    var index = Math.floor(Math.random()*this.mLayers.length);
+    // var index = Math.floor(Math.random()*this.mLayers.length);
+    var index = Math.floor(this.seedGenerator.random()*this.mLayers.length);
     output.push(this.mLayers[index]);
     output2.push(this.mLayersTiers[index]);
     this.mLayers.splice(index, 1);
@@ -112,7 +117,8 @@ WorldMatrix.prototype.generateWorld = function (numOfColumns, height)
       var lowerBound = this.mTiers[this.mLayersTiers[y]][0];
       var upperBound = this.mTiers[this.mLayersTiers[y]][1];
       // what if upper bound and lower bound are the same???
-      var num = Math.floor(Math.random()*(upperBound + 1 - lowerBound)) + lowerBound;
+      // var num = Math.floor(Math.random()*(upperBound + 1 - lowerBound)) + lowerBound;
+      var num = Math.floor(this.seedGenerator.random()*(upperBound + 1 - lowerBound)) + lowerBound;
       // adding num number of tile objects into the column
       var z = 0;
       for (z = 0; z < num; z++)
@@ -143,8 +149,8 @@ WorldMatrix.prototype.smoothTerrain = function ()
   {
     var len1 = this.mMatrix[r].length;
     var len2 = this.mMatrix[r + 1].length;
-    var check = Math.floor(Math.random()*2);
-
+    // var check = Math.floor(Math.random()*2);
+    var check = Math.floor(this.seedGenerator.random()*2);
 
     if (len1 > len2 + 1)
     {
@@ -184,10 +190,15 @@ WorldMatrix.prototype.emptySpace = function(tile, horizClearChance, vertClearCha
         return;
     tile.setTexture(null);
     
-    var topRandom = Math.random();
-    var botRandom = Math.random();
-    var leftRandom = Math.random();
-    var rightRandom = Math.random();
+    // var topRandom = Math.random();
+    // var botRandom = Math.random();
+    // var leftRandom = Math.random();
+    // var rightRandom = Math.random();
+
+    var topRandom = this.seedGenerator.random();
+    var botRandom = this.seedGenerator.random();
+    var leftRandom = this.seedGenerator.random();
+    var rightRandom = this.seedGenerator.random();
     
     if(tile.topNeighbor !== null && topRandom < vertClearChance)
         this.emptySpace(tile.topNeighbor, vertClearChance);
