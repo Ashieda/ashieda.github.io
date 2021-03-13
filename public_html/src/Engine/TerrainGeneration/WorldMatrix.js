@@ -40,6 +40,10 @@ function WorldMatrix(layers, layersTiers, tiers, tilePosition, tileSize) {
   this.mTileSize = tileSize;
 
   this.seedGenerator = new MersenneTwister();
+  
+  this.generationObjects = [];
+  this.generatedObjects = [];
+  this.occupiedColPositions = [];
 }
 
 WorldMatrix.prototype.getMatrix = function() { return this.mMatrix; };
@@ -70,6 +74,15 @@ WorldMatrix.prototype.draw = function (cam)
       }
     }
 
+  }
+  
+  for(var i = 0; i < this.generatedObjects.length; i++){
+      var objRend = this.generatedObjects[i].getRenderable();
+      var x = objRend.getXform().getXPos();
+      var y = objRend.getXform().getYPos();
+      //console.log("Drawing renderable at (" + x + ", " + y + ")");
+      objRend.draw(cam);
+      console.log("Number of generated objects: " + this.generatedObjects.length);
   }
 };
 
@@ -140,7 +153,74 @@ WorldMatrix.prototype.generateWorld = function (numOfColumns, height)
     this.mTilePosition = [this.mTilePosition[0] + this.mTileSize[0], startingY];
     this.mMatrix.push(col);
   }
+  
+  //Perform a pass over the terrain and attempt to generate objects
+  for(var x = 0; x < numOfColumns; ++x){
+      this.attemptObjGeneration(x);
+  }
 };
+
+//Function that attempts to generate aon object on a given column number
+WorldMatrix.prototype.attemptObjGeneration = function(colNumber){
+    //First, ensure the column isn't already occupied by an object
+    for(var i = 0; i < this.occupiedColPositions.length; i++){
+        if(this.mMatrix[colNumber] !== null){
+            var colPos = this.mMatrix[colNumber][0].getTexture().getXform().getXPos();
+            if(this.occupiedColPositions[i] === colPos){
+                return;
+            }
+        }
+
+    }
+    
+    for(var i = 0; i < this.generationObjects.length; ++i){
+        if(colNumber === 1)
+            console.log("Check");
+        console.log("Attempting generation at column " + colNumber);
+        var obj = this.generationObjects[i].clone();
+        var rand = this.seedGenerator.random();
+        //console.log(obj);
+        //Create & place the object in the world if the random number
+        //is less than the rate value
+        if(rand < obj.getRate()){
+            console.log("Successful generation at column " + colNumber);
+
+            //console.log("Creating obj at col " + x);
+            var col = this.mMatrix[colNumber];
+            var size = obj.getSize();
+            //Get a vertical offset value to help determine placement
+            var botToMidOffset = size[1] / 2;
+
+            var topColTile = col[col.length - 1];
+            var topTileXform = topColTile.getTexture().getXform();
+            var tileXPos = topTileXform.getXPos();
+            var tileYPos = topTileXform.getYPos();
+
+            var objXPos = tileXPos;
+            var objYPos = tileYPos + (this.mTileSize[1] / 2) + botToMidOffset;
+            //console.log("Object position: (" + objXPos + ", " + objYPos + ")");
+            //Set the object's position, add it to the list of objects to 
+            //generate, and exit this inner loop to prevent additional objects
+            //being set on this tile
+            obj.setPos(objXPos, objYPos);
+            //Register the column as occupied
+            this.occupiedColPositions.push(tileXPos);
+            //obj.setAttachedTile(topColTile);
+            //obj.setColNum(colNumber);
+            this.generatedObjects.push(obj);
+            break;
+        }
+    }
+};
+
+//WorldMatrix.prototype.auditGeneratedObjs = function(){
+//    for(var i = 0; i < this.generatedObjects.length; ++i){
+//        var attachedTile = this.generatedObjects[i].getAttachedTile();
+//        if(attachedTile === null){
+//            this.generatedObjects.splice(i, 1);
+//        }
+//    }
+//};
 
 WorldMatrix.prototype.addColumn = function(index, xPos, startY, height){
     var col = [];
@@ -172,12 +252,21 @@ WorldMatrix.prototype.addColumn = function(index, xPos, startY, height){
         height--;
       }
     }
-
+    //console.log("Creating a column at index " + index);
     this.mMatrix.splice(index, 0, col);
+    
+    //this.attemptObjGeneration(index);
 };
 
 WorldMatrix.prototype.removeColumn = function(columnNum){
+    var colX = this.mMatrix[columnNum][0].getTexture().getXform().getXPos();
+    //console.log("Deleting a column at index " + columnNum);
     this.mMatrix.splice(columnNum, 1);
+    for(var i = 0; i < this.occupiedColPositions.length; ++i){
+        if(this.occupiedColPositions[i] === colX)
+            this.occupiedColPositions.splice(i, 1);
+    }
+    
 };
 
 // will either add a tile or delete a tile if 2 adjacent columns are
@@ -220,6 +309,29 @@ WorldMatrix.prototype.smoothTerrain = function ()
       }
     }
   }
+};
+
+//Add an object for the world generator to include in its generation
+WorldMatrix.prototype.addGenerationObj = function(texture, size, generationRate){
+    var obj = new GenerationObject(texture, size, generationRate);
+    this.generationObjects.push(obj);
+};
+
+//Selectively remove an already-generated object from the world
+WorldMatrix.prototype.removeGeneratedObject = function(index){
+    this.generatedObjects.splice(index, 1);
+};
+
+//Culls any generated object outside a given boundary
+WorldMatrix.prototype.cullGeneratedObjects = function(minX, maxX, minY, maxY){
+    for(var i = 0; i < this.generatedObjects.length; i++){
+        var objPos = this.generatedObjects[i].getPos();
+        if(objPos[0] < minX || objPos[0] > maxX ||
+                objPos[1] < minY || objPos[1] > maxY){
+            console.log("Culling object " + i);
+            this.removeGeneratedObject(i);
+        }
+    }
 };
 
 //Attempts to create empty pockets in terrain, starting from the parameter tile

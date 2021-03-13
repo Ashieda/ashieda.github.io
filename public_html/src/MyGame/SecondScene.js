@@ -24,6 +24,17 @@ function SecondScene() {
     this.ebonTexture = "assets/TR_Ebonstone.png";
     this.pinkBrickTexture = "assets/Terraria_PinkBrick.png";
     this.dyeImage = "assets/Dye.png";
+    
+    this.greenTree1 = "assets/Green_Tree_1.png";
+    this.greenTree2 = "assets/Green_Tree_2.png";
+    this.greenTree3 = "assets/Green_Tree_3.png";
+    this.pinkTree1 = "assets/Pink_Tree_1.png";
+    this.pinkTree2 = "assets/Pink_Tree_2.png";
+    this.pinkTree3 = "assets/Pink_Tree_3.png";
+    this.yellowTree1 = "assets/Yellow_Tree_1.png";
+    this.yellowTree2 = "assets/Yellow_Tree_2.png";
+    this.yellowTree3 = "assets/Yellow_Tree_3.png";
+    
     this.dirtTile = null;
     this.arr = null;
     this.nextPos = null;
@@ -55,6 +66,15 @@ SecondScene.prototype.loadScene = function () {
     gEngine.Textures.loadTexture(this.ebonTexture);
     gEngine.Textures.loadTexture(this.pinkBrickTexture);
     gEngine.Textures.loadTexture(this.dyeImage);
+    gEngine.Textures.loadTexture(this.greenTree1);
+    gEngine.Textures.loadTexture(this.greenTree2);
+    gEngine.Textures.loadTexture(this.greenTree3);
+    gEngine.Textures.loadTexture(this.yellowTree1);
+    gEngine.Textures.loadTexture(this.yellowTree2);
+    gEngine.Textures.loadTexture(this.yellowTree3);
+    gEngine.Textures.loadTexture(this.pinkTree1);
+    gEngine.Textures.loadTexture(this.pinkTree2);
+    gEngine.Textures.loadTexture(this.pinkTree3);
 };
 
 SecondScene.prototype.unloadScene = function () {
@@ -66,6 +86,15 @@ SecondScene.prototype.unloadScene = function () {
     gEngine.Textures.unloadTexture(this.ebonTexture);
     gEngine.Textures.unloadTexture(this.pinkBrickTexture);
     gEngine.Textures.unloadTexture(this.dyeImage);
+    gEngine.Textures.unloadTexture(this.greenTree1);
+    gEngine.Textures.unloadTexture(this.greenTree2);
+    gEngine.Textures.unloadTexture(this.greenTree3);
+    gEngine.Textures.unloadTexture(this.yellowTree1);
+    gEngine.Textures.unloadTexture(this.yellowTree2);
+    gEngine.Textures.unloadTexture(this.yellowTree3);
+    gEngine.Textures.unloadTexture(this.pinkTree1);
+    gEngine.Textures.unloadTexture(this.pinkTree2);
+    gEngine.Textures.unloadTexture(this.pinkTree3);
 };
 
 SecondScene.prototype.initialize = function () {
@@ -102,6 +131,12 @@ SecondScene.prototype.initialize = function () {
     this.mHero.getXform().setPosition(30, 55);
     this.mHero.getXform().setSize(3, 4);
     this.mHero.createBoundingBox(30, 55, 3, 4);
+    
+//    this.tree1 = new TextureRenderable(this.greenTree1);
+//    this.tree1.setColor([0, 0, 0, 0]);
+//    this.tree1.getXform().setPosition(30, 55);
+//    this.tree1.getXform().setSize(8, 16);
+
 
     // this.dirtTile.setRarity(50);
 };
@@ -117,6 +152,7 @@ SecondScene.prototype.draw = function () {
       this.mWorldMatrix.draw(this.mCamera);
   
     this.mHero.draw(this.mCamera);
+    //this.tree1.draw(this.mCamera);
 };
 
 // The Update function, updates the application state. Make sure to _NOT_ draw
@@ -138,6 +174,17 @@ SecondScene.prototype.update = function () {
                                          -10 + (this.tileSize[1]/2)],
                                         this.tileSize);                // tile size
 
+    this.mWorldMatrix.addGenerationObj(this.greenTree1, [8, 16], .02);
+    this.mWorldMatrix.addGenerationObj(this.greenTree2, [8, 16], .02); 
+    this.mWorldMatrix.addGenerationObj(this.greenTree3, [8, 16], .02);
+    this.mWorldMatrix.addGenerationObj(this.yellowTree1, [8, 16], .02);
+    this.mWorldMatrix.addGenerationObj(this.yellowTree2, [8, 16], .02); 
+    this.mWorldMatrix.addGenerationObj(this.yellowTree3, [8, 16], .02);
+    this.mWorldMatrix.addGenerationObj(this.pinkTree1, [8, 16], .02);
+    this.mWorldMatrix.addGenerationObj(this.pinkTree2, [8, 16], .02); 
+    this.mWorldMatrix.addGenerationObj(this.pinkTree3, [8, 16], .02);
+
+    this.mWorldMatrix.setSeed(12345);                                    
     this.mWorldMatrix.generateWorld(100/this.tileSize[0], 75/this.tileSize[1]);
   }
   
@@ -162,6 +209,7 @@ SecondScene.prototype.update = function () {
           var newColY = floorY;
           this.mWorldMatrix.addColumn(worldMatrix.length, newColX, 
                                         newColY, 75/this.tileSize[1]);
+          this.mWorldMatrix.attemptObjGeneration(worldMatrix.length - 5);
       }
       
       var bottomLeftTile = worldMatrix[0][0];
@@ -176,13 +224,16 @@ SecondScene.prototype.update = function () {
           var newColX = leftMostX - this.tileSize[0];
           var newColY = floorY;
           this.mWorldMatrix.addColumn(0, newColX, newColY, 75/this.tileSize[1]);
+          this.mWorldMatrix.attemptObjGeneration(5);
+          //console.log("Blahblahblah");
       }
-      console.log("Number of columns: " + worldMatrix.length);
-      console.log("Leftmost X: " + leftMostX);
-      console.log("Rightmost X: " + rightMostX);
+      //console.log("Number of columns: " + worldMatrix.length);
+      //console.log("Leftmost X: " + leftMostX);
+      //console.log("Rightmost X: " + rightMostX);
+      this.mWorldMatrix.cullGeneratedObjects(leftMostX, rightMostX, -100, 100);
   }
 
-  
+ 
 
   if (gEngine.Input.isKeyClicked(gEngine.Input.keys.T))
   {
