@@ -4,14 +4,14 @@
         <title>Example 7.6: Line Support </title>
         <link rel ="icon" type ="image/x-icon" href="./assets/favicon.png">
 
-        <!-- the following says there are javascript source code contained in 
+        <!-- the following says there are javascript source code contained in
              the external source files
         -->
         <!-- external library -->
         <script type="text/javascript" src="src/lib/gl-matrix.js"></script>
 
         <!-- Engine code -->
-        <!-- Core of Engine --> 
+        <!-- Core of Engine -->
         <script type="text/javascript" src="src/Engine/Core/Engine_Core.js"></script>
         <script type="text/javascript" src="src/Engine/Core/Engine_VertexBuffer.js"></script>
         <script type="text/javascript" src="src/Engine/Core/Engine_GameLoop.js"></script>
@@ -43,6 +43,7 @@
         <script type ="text/javascript" src="src/Engine/TerrainGeneration/Tile.js"></script>
         <script type ="text/javascript" src="src/Engine/TerrainGeneration/WorldMatrix.js"></script>
         <script type ="text/javascript" src="src/Engine/TerrainGeneration/mersenne-twister.js"></script>
+        <script type ="text/javascript" src="src/Engine/TerrainGeneration/UserStruct.js"></script>
         <!-- GameObject -->
         <script type="text/javascript" src="src/Engine/GameObjects/GameObject.js"></script>
         <script type="text/javascript" src="src/Engine/GameObjects/GameObject_PixelCollision.js"></script>
@@ -63,11 +64,11 @@
         <script type="text/javascript" src="src/MyGame/MyGame.js"></script>
         <script type="text/javascript" src="src/MyGame/SecondScene.js"></script>
         <script type="text/javascript" src="src/MyGame/ThirdScene.js"></script>
-        
+
     </head>
 
     <body onload="
-        var myGame = new SecondScene();
+        var myGame = new MyGame();
         gEngine.Core.initializeEngineCore('GLCanvas', myGame);
      ">
         <canvas id="GLCanvas" width="640" height="480">
