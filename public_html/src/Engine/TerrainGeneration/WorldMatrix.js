@@ -62,8 +62,31 @@ WorldMatrix.prototype.setSeed = function(seed) { this.seedGenerator = new Mersen
 
 
 // draw the world matrix, element by element, to the canvas
-WorldMatrix.prototype.draw = function (cam)
+WorldMatrix.prototype.draw = function (cam, indexX1, indexY1, indexX2, indexY2)
 {
+  for (var x = indexX1; x < indexX2; x++)
+  {
+    if (this.mMatrix.length < x)
+      break;
+
+    for (var y = indexY1; y < indexY2; y++)
+    {
+        console.log("Fucking y is " + y);
+      if (this.mMatrix[x].length < y)
+        break;
+
+      if (this.mMatrix[x][y] !== null && this.mMatrix[x][y] !== undefined)
+      {
+        this.mMatrix[x][y].getTexture().draw(cam);
+      }
+    }
+
+  }
+  
+
+};
+
+WorldMatrix.prototype.drawInfinite = function(cam){
   for (var x = 0; x < this.mMatrix.length; x++)
   {
     for (var y = 0; y < this.mMatrix[x].length; y++)
@@ -75,7 +98,7 @@ WorldMatrix.prototype.draw = function (cam)
     }
 
   }
-  
+    
   for(var i = 0; i < this.generatedObjects.length; i++){
       var objRend = this.generatedObjects[i].getRenderable();
       var x = objRend.getXform().getXPos();
@@ -213,15 +236,6 @@ WorldMatrix.prototype.attemptObjGeneration = function(colNumber){
     }
 };
 
-//WorldMatrix.prototype.auditGeneratedObjs = function(){
-//    for(var i = 0; i < this.generatedObjects.length; ++i){
-//        var attachedTile = this.generatedObjects[i].getAttachedTile();
-//        if(attachedTile === null){
-//            this.generatedObjects.splice(i, 1);
-//        }
-//    }
-//};
-
 WorldMatrix.prototype.addColumn = function(index, xPos, startY, height){
     var col = [];
     var yPos = startY;
@@ -341,7 +355,7 @@ WorldMatrix.prototype.emptySpace = function(tile, horizClearChance, vertClearCha
     if(tile.getTexture() === null)
         return;
     tile.setTexture(null);
-    
+
     // var topRandom = Math.random();
     // var botRandom = Math.random();
     // var leftRandom = Math.random();
@@ -351,7 +365,7 @@ WorldMatrix.prototype.emptySpace = function(tile, horizClearChance, vertClearCha
     var botRandom = this.seedGenerator.random();
     var leftRandom = this.seedGenerator.random();
     var rightRandom = this.seedGenerator.random();
-    
+
     if(tile.topNeighbor !== null && topRandom < vertClearChance)
         this.emptySpace(tile.topNeighbor, vertClearChance);
     if(tile.botNeighbor !== null && botRandom < vertClearChance)
@@ -407,4 +421,312 @@ WorldMatrix.prototype.getTile = function(xPos, yPos) {
     }
 
     return null;
+};
+
+WorldMatrix.prototype.insertStructure = function(xRange, yRange, percent, struct) {
+  var added = false;
+  // for all applicable x values
+  for (var x = 0; x <= xRange[1]; x++) {
+    // for all applicable y values
+    for (var y = 0; y <= yRange[1]; y++) {
+      if (this.seedGenerator.random() < percent/100) {
+        // go element by element through the struct
+        for (var u = 0; u < struct.length; u++) {
+          for (var t = 0; t < struct[u].length; t++) {
+            if (xRange[0] + u < this.mMatrix.length && yRange[0] + t < this.mMatrix.length) {
+              var xP = this.mMatrix[xRange[0] + u][yRange[0] + t].getTexture().getXform().getXPos();
+              var yP = this.mMatrix[xRange[0] + u][yRange[0] + t].getTexture().getXform().getYPos();
+              struct[u][t].getTexture().getXform().setXPos(xP);
+              struct[u][t].getTexture().getXform().setYPos(yP);
+              this.mMatrix[xRange[0] + u][yRange[0] + t] = struct[u][t];
+            }
+          }
+        }
+        x += struct.length;
+        added = true;
+        return;
+      }
+    }
+  }
+}
+
+// ################## PRESETS ##################
+WorldMatrix.prototype.presetHills = function (xStart, xEnd, variance) {
+  var height = this.mMatrix[xStart].length;
+  var vari = variance;
+  for (var x = xStart; x <= xEnd; x++) {
+    while (this.mMatrix[x].length > height) {
+      this.mMatrix[x].splice(this.mMatrix[x].length - 1, 1);
+    }
+
+    while (this.mMatrix[x].length < height) {
+      var tilePos = [
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+      ];
+      var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+      this.mMatrix[x].push(tile);
+    }
+
+
+    if (variance > 0) {
+      if (Math.floor(this.seedGenerator.random()*2) > 0) {
+        var tilePos = [
+          this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+          this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+        ];
+        var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+        this.mMatrix[x].push(tile);
+        variance--;
+        height++;
+
+        if (variance === 0)
+          variance = -vari;
+      }
+    }else if (variance < 0) {
+      if (Math.floor(this.seedGenerator.random()*2) > 0) {
+        this.mMatrix[x].splice(this.mMatrix.length - 1, 1);
+        variance++;
+        height--;
+
+        if (variance === 0)
+          variance = vari;
+      }
+    }
+  }
+};
+
+// ################## PRESETS ##################
+WorldMatrix.prototype.presetPlains = function (xStart, xEnd, variance) {
+  var height = this.mMatrix[xStart].length;
+  var vari = variance;
+  for (var x = xStart; x <= xEnd; x++) {
+    while (this.mMatrix[x].length > height) {
+      this.mMatrix[x].splice(this.mMatrix[x].length - 1, 1);
+    }
+
+    while (this.mMatrix[x].length < height) {
+      var tilePos = [
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+      ];
+      var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+      this.mMatrix[x].push(tile);
+    }
+    variance--;
+
+    if (variance <= 0) {
+      variance = vari;
+      var amount = Math.floor(this.seedGenerator.random()*2) - 1;
+      if (amount === 0) {
+        var tilePos = [
+          this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+          this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+        ];
+        var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+        this.mMatrix[x].push(tile);
+        height++;
+      }else {
+        this.mMatrix[x].splice(this.mMatrix.length - 1, 1);
+        height--;
+      }
+    }
+  }
+};
+
+WorldMatrix.prototype.presetMountains = function (xStart, xEnd, variance, incr) {
+
+  var height = this.mMatrix[xStart].length;
+  var vari = variance;
+  for (var x = xStart; x <= xEnd; x++) {
+    while (this.mMatrix[x].length > height) {
+      this.mMatrix[x].splice(this.mMatrix[x].length - 1, 1);
+    }
+
+    while (this.mMatrix[x].length < height) {
+      var tilePos = [
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+      ];
+      var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+      this.mMatrix[x].push(tile);
+    }
+
+
+    if (variance > 0) {
+      var amount = Math.floor(this.seedGenerator.random()*incr) + 2;
+      if (amount > 0) {
+        for (var t = 0; t <= amount; t++) {
+          var tilePos = [
+            this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+            this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+          ];
+          var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+          this.mMatrix[x].push(tile);
+          variance--;
+          height++;
+
+          if (variance === 0) {
+            variance = -vari;
+            break;
+          }
+        }
+      }
+    }else if (variance < 0) {
+      var amount = Math.floor(this.seedGenerator.random()*incr) + 2;
+      if (amount > 0) {
+        for (var t = 0; t <= amount; t++) {
+          this.mMatrix[x].splice(this.mMatrix.length - 1, 1);
+          variance++;
+          height--;
+
+          if (variance === 0) {
+            variance = vari;
+            if (x + variance * 1.5 < xEnd) {
+              this.presetHills(x, x + variance * 1.5, 3);
+            }else {
+              this.presetHills(x, xEnd, 3);
+            }
+            x += variance * 1.5;
+            break;
+          }
+        }
+      }
+    }
+  }
+};
+
+
+
+WorldMatrix.prototype.presetPlateau = function (xStart, xEnd, variance, incr) {
+
+  var height = this.mMatrix[xStart].length;
+  var vari = variance;
+  for (var x = xStart; x <= xEnd; x++) {
+    while (this.mMatrix[x].length > height) {
+      this.mMatrix[x].splice(this.mMatrix[x].length - 1, 1);
+    }
+
+    while (this.mMatrix[x].length < height) {
+      var tilePos = [
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+      ];
+      var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+      this.mMatrix[x].push(tile);
+    }
+
+
+    if (variance > 0) {
+      var amount = Math.floor(this.seedGenerator.random()*incr) + 2;
+      if (amount > 0) {
+        for (var t = 0; t <= amount; t++) {
+          var tilePos = [
+            this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+            this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+          ];
+          var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+          this.mMatrix[x].push(tile);
+          variance--;
+          height++;
+
+          if (variance === 0) {
+            variance = vari;
+            if (x + variance * 1.5 < xEnd) {
+              this.presetPlains(x, x + variance * 1.5, variance);
+            }else {
+              this.presetPlains(x, xEnd, xEnd - x);
+            }
+            x += variance * 1.5;
+            variance = -vari;
+            break;
+          }
+        }
+      }
+    }else if (variance < 0) {
+      var amount = Math.floor(this.seedGenerator.random()*incr) + 2;
+      if (amount > 0) {
+        for (var t = 0; t <= amount; t++) {
+          this.mMatrix[x].splice(this.mMatrix.length - 1, 1);
+          variance++;
+          height--;
+
+          if (variance === 0) {
+            variance = vari;
+            if (x + variance * 1.5 < xEnd) {
+              this.presetHills(x, x + variance * 1.5, 3);
+            }else {
+              this.presetHills(x, xEnd, 3);
+            }
+            x += variance * 1.5;
+            break;
+          }
+        }
+      }
+    }
+  }
+};
+
+
+WorldMatrix.prototype.presetValleys = function (xStart, xEnd, variance) {
+  var height = this.mMatrix[xStart].length;
+  var vari = variance;
+  for (var x = xStart; x <= xEnd; x++) {
+    while (this.mMatrix[x].length > height) {
+      this.mMatrix[x].splice(this.mMatrix[x].length - 1, 1);
+    }
+
+    while (this.mMatrix[x].length < height) {
+      var tilePos = [
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+        this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+      ];
+      var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+      this.mMatrix[x].push(tile);
+    }
+
+
+    if (variance < 0) {
+      var amount = Math.floor(this.seedGenerator.random()*3);
+      if (amount > 0) {
+        for (var t = 0; t <= amount; t++) {
+          var tilePos = [
+            this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getXPos(),
+            this.mMatrix[x][this.mMatrix[x].length - 1].getTexture().getXform().getYPos() + this.mTileSize[1]
+          ];
+          var tile = new Tile(this.mLayers[this.mLayers.length - 1], tilePos, this.mTileSize);
+          this.mMatrix[x].push(tile);
+          variance++;
+          height++;
+
+          if (variance === 0) {
+            variance = vari;
+            // x++;
+            break;
+          }
+        }
+      }
+    }else if (variance > 0) {
+      var amount = Math.floor(this.seedGenerator.random()*3) - 1;
+      if (amount > 0) {
+        for (var t = 0; t <= amount; t++) {
+          this.mMatrix[x].splice(this.mMatrix.length - 1, 1);
+          variance--;
+          height--;
+
+          if (variance === 0) {
+            variance = vari;
+            if (x + variance * 1.5 < xEnd) {
+              this.presetHills(x, x + variance * 1.5, 3);
+            }else {
+              this.presetHills(x, xEnd, 3);
+            }
+            x += variance * 1.5;
+            variance = -vari;
+            break;
+          }
+        }
+      }
+    }
+  }
 };

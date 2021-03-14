@@ -54,6 +54,11 @@ function SecondScene() {
     this.canMoveUp = true;
     this.canMoveLeft = true;
     this.canMoveRight = true;
+    
+    this.startX = null;
+    this.startY = null;
+    this.endX = null;
+    this.endY = null;
 
 }
 gEngine.Core.inheritPrototype(SecondScene, Scene);
@@ -132,10 +137,6 @@ SecondScene.prototype.initialize = function () {
     this.mHero.getXform().setSize(3, 4);
     this.mHero.createBoundingBox(30, 55, 3, 4);
     
-//    this.tree1 = new TextureRenderable(this.greenTree1);
-//    this.tree1.setColor([0, 0, 0, 0]);
-//    this.tree1.getXform().setPosition(30, 55);
-//    this.tree1.getXform().setSize(8, 16);
 
 
     // this.dirtTile.setRarity(50);
@@ -149,7 +150,7 @@ SecondScene.prototype.draw = function () {
 
     this.mCamera.setupViewProjection();
     if (this.mWorldMatrix !== null)
-      this.mWorldMatrix.draw(this.mCamera);
+      this.mWorldMatrix.drawInfinite(this.mCamera);
   
     this.mHero.draw(this.mCamera);
     //this.tree1.draw(this.mCamera);

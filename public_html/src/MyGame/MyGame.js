@@ -31,17 +31,30 @@ function MyGame() {
     this.mWorldMatrix = null;
     this.mTiers = null;
     this.mCameraCenter = null;
-    
+
     //Storage variables for tiles Dye collides with
     this.topCollidingTile = null;
     this.botCollidingTile = null;
     this.leftCollidingTile = null;
     this.rightCollidingTile = null;
-    
+
     this.canMoveDown = true;
     this.canMoveUp = true;
     this.canMoveLeft = true;
     this.canMoveRight = true;
+
+    this.startX = null;
+    this.startY = null;
+    this.endX = null;
+    this.endY = null;
+
+    this.tempStruct = [];
+
+    this.mUserStruct = null;
+    this.tempStruct2 = null;
+
+    this.worldWidth = null;
+    this.worldHeight = null;
 
 }
 gEngine.Core.inheritPrototype(MyGame, Scene);
@@ -79,11 +92,11 @@ MyGame.prototype.initialize = function () {
 
     this.arr = [];
     this.nextPos = [-17.5, -7.5];
-    this.tileSize = [3, 3];
+    this.tileSize = [1, 1];
 
     this.mWorldMatrix = null;
     this.mTiers = [ [0, 1],
-                    [99, 100],
+                    [8, 10],
                     [3, 4],
                     [3, 5],
                     [7, 10] ];
@@ -92,14 +105,42 @@ MyGame.prototype.initialize = function () {
     this.mMsg.setColor([0, 0, 0, 1]);
     this.mMsg.getXform().setPosition(-19, -8);
     this.mMsg.setTextHeight(3);
-    
+
     this.mHero = new SpriteRenderable(this.dyeImage);
     this.mHero.setColor([1, 1, 1, 0]);
     this.mHero.getXform().setPosition(30, 55);
     this.mHero.getXform().setSize(3, 4);
     this.mHero.createBoundingBox(30, 55, 3, 4);
 
-    // this.dirtTile.setRarity(50);
+    this.startX = 0;
+    this.startY = 0;
+    this.endX = 60;
+    this.endY = 60;
+
+    this.tempStruct2 = [];
+    var tempTile2 = new Tile(this.pinkBrickTexture, [0, 0], [3, 3]);
+    for (var x = 0; x < 5; x++) {
+      var col = [];
+      for (var y = 0; y < 7; y++) {
+        var tempTile = new Tile(this.diamondTexture, [0, 0], [3, 3]);
+        col.push(tempTile);
+      }
+      this.tempStruct2.push(col);
+    }
+    console.log("final result: " + this.tempStruct2);
+
+
+    this.tempStruct = [
+      [tempTile, tempTile2, tempTile, tempTile2, tempTile],
+      [tempTile, tempTile2, tempTile, tempTile2],
+      [tempTile, tempTile2, tempTile, tempTile2, tempTile, tempTile2],
+      [tempTile, tempTile2, tempTile, tempTile2, tempTile]
+    ];
+
+    this.mUserStruct = new UserStruct(this.tempStruct);
+
+    this.worldWidth = 300;
+    this.worldHeight = 75;
 };
 
 // This is the draw function, make sure to setup proper drawing environment, and more
@@ -110,8 +151,8 @@ MyGame.prototype.draw = function () {
 
     this.mCamera.setupViewProjection();
     if (this.mWorldMatrix !== null)
-      this.mWorldMatrix.draw(this.mCamera);
-  
+      this.mWorldMatrix.draw(this.mCamera, this.startX, this.startY, this.endX, this.endY);
+
   this.mHero.draw(this.mCamera);
 };
 
@@ -124,7 +165,7 @@ MyGame.prototype.update = function () {
                        this.diamondTexture,
                        this.stoneTexture,
                        this.dirtTexture];
-    var layerTiers = [3, 0, 4, 3];
+    var layerTiers = [3, 0, 4, 1];
 
     this.mWorldMatrix = new WorldMatrix(arrOfLayers,                    // array of the layers
                                         layerTiers,                    // array of the tiers for the layers
@@ -132,18 +173,53 @@ MyGame.prototype.update = function () {
                                         [-20 + (this.tileSize[0]/2),   // starting position
                                          -10 + (this.tileSize[1]/2)],
                                         this.tileSize);                // tile size
+    // this.mWorldMatrix.randomizeLayers();
 
-    // this.mWorldMatrix.randomizeLayers();           
-    
-    this.mWorldMatrix.setSeed(12345);
-    this.mWorldMatrix.generateWorld(100/this.tileSize[0], 75/this.tileSize[1]);
+    // this.mWorldMatrix.setSeed(12345);
+    this.mWorldMatrix.generateWorld(this.worldWidth, this.worldHeight);
   }
 
   if (gEngine.Input.isKeyClicked(gEngine.Input.keys.T))
   {
-    this.mWorldMatrix.smoothTerrain();
+    // this.mWorldMatrix.smoothTerrain();
+    // console.log(this.mUserStruct.getStruct());
+    // this.mUserStruct.addNoiseUpdated(0, 4);
+    // console.log(this.mUserStruct.getStruct());
+    // this.mWorldMatrix.insertStructure([0, 10], [0, 10], 100, this.tempStruct2);
+
+    this.mWorldMatrix.presetPlateau(0, 299, 20, 5);
+
   }
 
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.L)) {
+    if (this.endX < this.worldWidth) {
+      this.startX += 1;
+      this.endX += 1;
+    }
+  }
+
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.K)) {
+    if (this.startY > 0) {
+      this.startY -= 1;
+      this.endY -= 1;
+    }
+  }
+
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.J)) {
+    if (this.startX > 0) {
+      this.startX -= 1;
+      this.endX -= 1;
+    }
+  }
+
+  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.I)) {
+    if (this.endY < this.worldHeight) {
+      this.startY += 1;
+      this.endY += 1;
+    }
+  }
+
+/*
   if (gEngine.Input.isKeyPressed(gEngine.Input.keys.W))
   {
     if (this.mCameraCenter[1] < 60)
@@ -195,34 +271,34 @@ MyGame.prototype.update = function () {
       this.mCameraCenter[1] += (27.5 - this.mCameraCenter[1])*0.3;
     }
   }
-  
-  //******************Handle Dye's Movement************************//
+
+  //******************Handle Dye's Movement************************
   var posDelta = 0.5;
-  
+
   if(this.canMoveUp && gEngine.Input.isKeyPressed(gEngine.Input.keys.Up)){
       this.mHero.getXform().incYPosBy(posDelta);
   }
-  
+
   if(this.canMoveDown && gEngine.Input.isKeyPressed(gEngine.Input.keys.Down)){
       this.mHero.getXform().incYPosBy(-posDelta);
   }
-  
+
   if(this.canMoveLeft && gEngine.Input.isKeyPressed(gEngine.Input.keys.Left)){
       this.mHero.getXform().incXPosBy(-posDelta);
   }
-  
+
   if(this.canMoveRight && gEngine.Input.isKeyPressed(gEngine.Input.keys.Right)){
       this.mHero.getXform().incXPosBy(posDelta);
   }
-  
+
   //Update the bounding box position
   var heroX = this.mHero.getXform().getXPos();
   var heroY = this.mHero.getXform().getYPos();
   var heroWidth = this.mHero.getXform().getWidth();
   var heroHeight = this.mHero.getXform().getHeight();
   this.mHero.setBound(heroX, heroY, heroWidth, heroHeight);
-  //****************************************************************//
-  
+  //****************************************************************
+
   if(this.mWorldMatrix !== null){
     var worldMatrix = this.mWorldMatrix.getMatrix();
     //Check for collision between tiles and Dye
@@ -256,31 +332,31 @@ MyGame.prototype.update = function () {
 
         }
     }
-    
+
     if(this.botCollidingTile !== null){
         var heroBound = this.mHero.getBound();
         if( ! this.botCollidingTile.objCollision(heroBound))
             this.canMoveDown = true;
     }
-    
+
     if(this.leftCollidingTile !== null){
         var heroBound = this.mHero.getBound();
         if( ! this.leftCollidingTile.objCollision(heroBound))
             this.canMoveLeft = true;
     }
-    
+
     if(this.topCollidingTile !== null){
         var heroBound = this.mHero.getBound();
         if( ! this.topCollidingTile.objCollision(heroBound))
             this.canMoveUp = true;
     }
-    
+
     if(this.rightCollidingTile !== null){
         var heroBound = this.mHero.getBound();
         if( ! this.rightCollidingTile.objCollision(heroBound))
             this.canMoveRight = true;
     }
-    
+
   }
 
 
@@ -296,6 +372,6 @@ MyGame.prototype.update = function () {
     }
 
   }
-
+*/
   this.mCamera.updateCam();
 };
