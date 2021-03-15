@@ -20,6 +20,15 @@ function Tile(textureAsset, posArr, sizeArr) {
 	this.rightNeighbor = null;
 }
 
+Tile.prototype.clone = function() {
+    var textureAsset = this.mName;
+    var posArr = this.mTexture.getXform().getPosition();
+    var sizeArr = this.mTexture.getXform().getSize();
+    
+    var newTile = new Tile(textureAsset, posArr, sizeArr);
+    return newTile;
+};
+
 Tile.prototype.getTextureAsset = function () { return this.mName; };
 
 Tile.prototype.setTexture = function (texture) {
