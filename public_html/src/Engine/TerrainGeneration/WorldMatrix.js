@@ -49,6 +49,9 @@ function WorldMatrix(layers, layersTiers, tiers, tilePosition, tileSize) {
 WorldMatrix.prototype.getMatrix = function() { return this.mMatrix; };
 WorldMatrix.prototype.setMatrix = function(matrix) { this.mMatrix = matrix; };
 
+WorldMatrix.prototype.getGeneration = function() { return this.generationObjects; };
+WorldMatrix.prototype.setGeneration = function(matrix) { this.mMatrix = matrix; };
+
 WorldMatrix.prototype.getLayers = function() { return this.mLayers; };
 WorldMatrix.prototype.setLayers = function(layers) { this.mLayers = layers; };
 
@@ -79,7 +82,15 @@ WorldMatrix.prototype.draw = function (cam, indexX1, indexY1, indexX2, indexY2)
         this.mMatrix[x][y].getTexture().draw(cam);
       }
     }
-
+  }
+  for(var i = 0; i < this.generatedObjects.length; i++){
+      var objRend = this.generatedObjects[i].getRenderable();
+      var x = objRend.getXform().getXPos();
+      var y = objRend.getXform().getYPos();
+      //console.log("Drawing renderable at (" + x + ", " + y + ")");
+      if (x > indexX1 - 20 && x < indexX2 - 20 && y > indexY1 && y < indexY2)
+        objRend.draw(cam);
+      console.log("Number of generated objects: " + this.generatedObjects.length);
   }
 
 
