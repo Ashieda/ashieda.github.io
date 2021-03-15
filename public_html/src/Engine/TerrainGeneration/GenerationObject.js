@@ -13,7 +13,7 @@ function GenerationObject(textureAsset, sizeArr, generationRate) {
 
         this.mBound = null;
         this.generationRate = generationRate;
-        
+
         //this.attachedTile = null;
         //this.columnNum = 0;
 }
