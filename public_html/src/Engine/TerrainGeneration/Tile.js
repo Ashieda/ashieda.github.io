@@ -54,6 +54,15 @@ Tile.prototype.objCollision = function(objectBound){
     return this.mBound.intersectsBound(objectBound);
 };
 
+Tile.prototype.clone = function() {
+    var textureAsset = this.mName;
+    var posArr = this.mTexture.getXform().getPosition();
+    var sizeArr = this.mTexture.getXform().getSize();
+
+    var newTile = new Tile(textureAsset, posArr, sizeArr);
+    return newTile;
+};
+
 // Debugging helper function
 Tile.prototype.print = function () {
 	return "Tile " + this.mName + " Print(): " + "\n" +
