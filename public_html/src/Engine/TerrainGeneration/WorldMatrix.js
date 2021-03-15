@@ -40,7 +40,7 @@ function WorldMatrix(layers, layersTiers, tiers, tilePosition, tileSize) {
   this.mTileSize = tileSize;
 
   this.seedGenerator = new MersenneTwister();
-  
+
   this.generationObjects = [];
   this.generatedObjects = [];
   this.occupiedColPositions = [];
@@ -71,7 +71,6 @@ WorldMatrix.prototype.draw = function (cam, indexX1, indexY1, indexX2, indexY2)
 
     for (var y = indexY1; y < indexY2; y++)
     {
-        console.log("Fucking y is " + y);
       if (this.mMatrix[x].length < y)
         break;
 
@@ -82,7 +81,7 @@ WorldMatrix.prototype.draw = function (cam, indexX1, indexY1, indexX2, indexY2)
     }
 
   }
-  
+
 
 };
 
@@ -98,7 +97,7 @@ WorldMatrix.prototype.drawInfinite = function(cam){
     }
 
   }
-    
+
   for(var i = 0; i < this.generatedObjects.length; i++){
       var objRend = this.generatedObjects[i].getRenderable();
       var x = objRend.getXform().getXPos();
@@ -176,7 +175,7 @@ WorldMatrix.prototype.generateWorld = function (numOfColumns, height)
     this.mTilePosition = [this.mTilePosition[0] + this.mTileSize[0], startingY];
     this.mMatrix.push(col);
   }
-  
+
   //Perform a pass over the terrain and attempt to generate objects
   for(var x = 0; x < numOfColumns; ++x){
       this.attemptObjGeneration(x);
@@ -195,7 +194,7 @@ WorldMatrix.prototype.attemptObjGeneration = function(colNumber){
         }
 
     }
-    
+
     for(var i = 0; i < this.generationObjects.length; ++i){
         if(colNumber === 1)
             console.log("Check");
@@ -222,7 +221,7 @@ WorldMatrix.prototype.attemptObjGeneration = function(colNumber){
             var objXPos = tileXPos;
             var objYPos = tileYPos + (this.mTileSize[1] / 2) + botToMidOffset;
             //console.log("Object position: (" + objXPos + ", " + objYPos + ")");
-            //Set the object's position, add it to the list of objects to 
+            //Set the object's position, add it to the list of objects to
             //generate, and exit this inner loop to prevent additional objects
             //being set on this tile
             obj.setPos(objXPos, objYPos);
@@ -268,7 +267,7 @@ WorldMatrix.prototype.addColumn = function(index, xPos, startY, height){
     }
     //console.log("Creating a column at index " + index);
     this.mMatrix.splice(index, 0, col);
-    
+
     //this.attemptObjGeneration(index);
 };
 
@@ -280,7 +279,7 @@ WorldMatrix.prototype.removeColumn = function(columnNum){
         if(this.occupiedColPositions[i] === colX)
             this.occupiedColPositions.splice(i, 1);
     }
-    
+
 };
 
 // will either add a tile or delete a tile if 2 adjacent columns are
@@ -424,27 +423,27 @@ WorldMatrix.prototype.getTile = function(xPos, yPos) {
 };
 
 WorldMatrix.prototype.insertStructure = function(xRange, yRange, percent, struct) {
-  var added = false;
   // for all applicable x values
-  for (var x = 0; x <= xRange[1]; x++) {
+  for (var x = xRange[0]; x <= xRange[1]; x++) {
     // for all applicable y values
-    for (var y = 0; y <= yRange[1]; y++) {
-      if (this.seedGenerator.random() < percent/100) {
+    for (var y = yRange[0]; y <= yRange[1]; y++) {
+      var rand = this.seedGenerator.random();
+      if (rand < percent/100) {
         // go element by element through the struct
         for (var u = 0; u < struct.length; u++) {
           for (var t = 0; t < struct[u].length; t++) {
-            if (xRange[0] + u < this.mMatrix.length && yRange[0] + t < this.mMatrix.length) {
-              var xP = this.mMatrix[xRange[0] + u][yRange[0] + t].getTexture().getXform().getXPos();
-              var yP = this.mMatrix[xRange[0] + u][yRange[0] + t].getTexture().getXform().getYPos();
-              struct[u][t].getTexture().getXform().setXPos(xP);
-              struct[u][t].getTexture().getXform().setYPos(yP);
-              this.mMatrix[xRange[0] + u][yRange[0] + t] = struct[u][t];
+            if (xRange[0] + u < this.mMatrix.length &&
+                yRange[0] + t < this.mMatrix[y + t].length &&
+                this.mMatrix[x + u][y + t] !== undefined &&
+                struct[u][t] !== null) {
+              var xP = this.mMatrix[x + u][y + t].getTexture().getXform().getXPos();
+              var yP = this.mMatrix[x + u][y + t].getTexture().getXform().getYPos();
+              var tile = new Tile(struct[u][t].getTextureAsset(), [xP, yP], this.mTileSize);
+              this.mMatrix[x + u][y + t] = tile.clone();
             }
           }
         }
         x += struct.length;
-        added = true;
-        return;
       }
     }
   }

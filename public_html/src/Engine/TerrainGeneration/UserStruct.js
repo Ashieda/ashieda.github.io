@@ -14,83 +14,8 @@ UserStruct.prototype.setSeed = function(seed) {
   this.mSeed = seed;
 };
 
-// ############### BUGGED ###############
-UserStruct.prototype.addNoise = function(min, variance) {
-  for (var x = 0; x < this.mUserStruct.length; x++) {
-    console.log(this.mUserStruct);
-    var amount = Math.floor(this.mSeedGenerator.random()*variance);
-    var location = Math.floor(this.mSeedGenerator.random()*3);
-    var addOrSub = Math.floor(this.mSeedGenerator.random()*2);
-    console.log("Amount : " + amount + " | location : " + location + " | addOrSub : " + addOrSub);
-
-    // first non null value
-    var botIndex = -1;
-    var topIndex = -1;
-    var topObj = null;
-    var botObj = null;
-    var check = false;
-    for (var y = 0; y < this.mUserStruct[x].length; y++) {
-      if (this.mUserStruct[x][y] !== null) {
-        check = true;
-        botIndex = y;
-        botObj = this.mUserStruct[x][y];
-      }
-    }
-
-    for (var y = this.mUserStruct[x].length - 1; y > 0; y--) {
-      if (this.mUserStruct[x][y] !== null) {
-        check = true;
-        topIndex = y;
-        topObj = this.mUserStruct[x][y];
-      }
-    }
-
-    // add case
-    if (addOrSub === 0)
-    {
-      // bot case
-      if (location === 0) {
-        console.log("ADD BOT");
-        for (var t = 0; t < amount; t++)
-          this.mUserStruct[x].splice(botIndex, 0, botObj);
-
-        for (var x1 = 0; x1 < this.mUserStruct[x].length; x1++) {
-          for (var t = 0; t < amount; t++)
-            this.mUserStruct[x].splice(botIndex, 0, null);
-        }
-      // top case
-      }else if (location === 1) {
-        console.log("ADD TOP");
-        this.mUserStruct.splice(topIndex, 0, topObj);
-      }else {
-        console.log("SKIP");
-      }
-    // sub case
-    }else {
-      if (amount > this.mUserStruct[x].length) {
-        this.mUserStruct[x] = [null];
-        break;
-      }
-      // bot case
-      if (location === 0) {
-        console.log("SUB BOT");
-        for (var u = 0; u < amount; u++)
-          this.mUserStruct[x][botIndex + u] = null;
-      // top case
-      }else if (location === 1) {
-        console.log("SUB TOP");
-        for (var u = 0; u < amount; u++)
-          this.mUserStruct[x][topIndex - u] = null;
-      // no change
-      }else {
-        console.log("SKIP");
-      }
-    }
-  }
-};
-
 // Updated Add Noise (Tested but not extensively)
-UserStruct.prototype.addNoiseUpdated = function(min, variance) {
+UserStruct.prototype.addNoise = function(min, variance) {
   for (var x = 0; x < this.mUserStruct.length; x++) {
     console.log(this.mUserStruct);
     var amount = Math.floor(this.mSeedGenerator.random()*variance + min);

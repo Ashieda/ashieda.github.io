@@ -114,8 +114,8 @@ MyGame.prototype.initialize = function () {
 
     this.startX = 0;
     this.startY = 0;
-    this.endX = 60;
-    this.endY = 60;
+    this.endX = 100;
+    this.endY = 75;
 
     this.tempStruct2 = [];
     var tempTile2 = new Tile(this.pinkBrickTexture, [0, 0], [3, 3]);
@@ -137,9 +137,9 @@ MyGame.prototype.initialize = function () {
       [tempTile, tempTile2, tempTile, tempTile2, tempTile]
     ];
 
-    this.mUserStruct = new UserStruct(this.tempStruct);
+    this.mUserStruct = new UserStruct(this.tempStruct2);
 
-    this.worldWidth = 300;
+    this.worldWidth = 500;
     this.worldHeight = 75;
 };
 
@@ -187,88 +187,55 @@ MyGame.prototype.update = function () {
     // console.log(this.mUserStruct.getStruct());
     // this.mWorldMatrix.insertStructure([0, 10], [0, 10], 100, this.tempStruct2);
 
-    this.mWorldMatrix.presetPlateau(0, 299, 20, 5);
-
+    this.mWorldMatrix.presetHills(0, 35, 3);
+    this.mWorldMatrix.presetValleys(36, 55, 10, 5);
+    this.mWorldMatrix.presetHills(56, 75, 3);
+    this.mWorldMatrix.presetPlateau(76, 125, 20, 5);
+    this.mWorldMatrix.presetValleys(126, 175, 10, 5);
+    this.mWorldMatrix.presetMountains(176, 230, 50, 5);
+    this.mWorldMatrix.presetValleys(231, 250, 10, 5);
+    this.mWorldMatrix.presetPlains(251, 350, 5);
+    this.mWorldMatrix.presetMountains(351, 400, 50, 5);
+    this.mWorldMatrix.presetPlateau(401, 445, 20, 5);
+    this.mWorldMatrix.presetValleys(446, 480, 10, 5);
+    this.mWorldMatrix.presetHills(481, 499, 3);
   }
 
+  if (gEngine.Input.isKeyClicked(gEngine.Input.keys.Z)) {
+    this.mUserStruct.addNoise(1, 3);
+    this.mWorldMatrix.insertStructure([5, 100], [10, 12], 1, this.mUserStruct.getStruct());
+  }
+
+var delta = 1;
   if (gEngine.Input.isKeyPressed(gEngine.Input.keys.L)) {
     if (this.endX < this.worldWidth) {
-      this.startX += 1;
-      this.endX += 1;
+      this.startX += delta;
+      this.endX += delta;
+      this.mCameraCenter[0] += delta;
     }
   }
 
   if (gEngine.Input.isKeyPressed(gEngine.Input.keys.K)) {
     if (this.startY > 0) {
-      this.startY -= 1;
-      this.endY -= 1;
+      this.startY -= delta;
+      this.endY -= delta;
+      this.mCameraCenter[1] -= delta;
     }
   }
 
   if (gEngine.Input.isKeyPressed(gEngine.Input.keys.J)) {
     if (this.startX > 0) {
-      this.startX -= 1;
-      this.endX -= 1;
+      this.startX -= delta;
+      this.endX -= delta;
+      this.mCameraCenter[0] -= delta;
     }
   }
 
   if (gEngine.Input.isKeyPressed(gEngine.Input.keys.I)) {
     if (this.endY < this.worldHeight) {
-      this.startY += 1;
-      this.endY += 1;
-    }
-  }
-
-/*
-  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.W))
-  {
-    if (this.mCameraCenter[1] < 60)
-    {
-      this.mCameraCenter[1] += (60 - this.mCameraCenter[1])*0.3;
-    }
-  }else {
-    if (this.mCameraCenter[1] > 27.5)
-    {
-      this.mCameraCenter[1] -= (this.mCameraCenter[1] - 27.5)*0.3;
-    }
-  }
-
-  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.A))
-  {
-    if (this.mCameraCenter[0] > 22.5)
-    {
-      this.mCameraCenter[0] -= (this.mCameraCenter[1] - 22.5)*0.3;
-    }
-  }else {
-    if (this.mCameraCenter[0] < 30)
-    {
-      this.mCameraCenter[0] += (30 - this.mCameraCenter[0])*0.3;
-    }
-  }
-
-  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.D))
-  {
-    if (this.mCameraCenter[0] < 37.5)
-    {
-      this.mCameraCenter[0] += (37.5 - this.mCameraCenter[1])*0.3;
-    }
-  }else {
-    if (this.mCameraCenter[0] > 30)
-    {
-      this.mCameraCenter[0] -= (this.mCameraCenter[0] - 30)*0.3;
-    }
-  }
-
-  if (gEngine.Input.isKeyPressed(gEngine.Input.keys.S))
-  {
-    if (this.mCameraCenter[1] > 20)
-    {
-      this.mCameraCenter[1] -= (this.mCameraCenter[1] - 20)*0.3;
-    }
-  }else {
-    if (this.mCameraCenter[1] < 27.5)
-    {
-      this.mCameraCenter[1] += (27.5 - this.mCameraCenter[1])*0.3;
+      this.startY += delta;
+      this.endY += delta;
+      this.mCameraCenter[1] += delta;
     }
   }
 
@@ -372,6 +339,6 @@ MyGame.prototype.update = function () {
     }
 
   }
-*/
+
   this.mCamera.updateCam();
 };
